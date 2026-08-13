@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+*.asm
+*.o
+hello
+
+.vscode/
+.idea/
+.DS_Store
