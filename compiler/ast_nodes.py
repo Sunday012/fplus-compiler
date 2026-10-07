@@ -60,6 +60,13 @@ class BooleanLiteral(Expression):
 
 
 @dataclass(frozen=True)
+class StringLiteral(Expression):
+    value: str
+    line: int
+    column: int
+
+
+@dataclass(frozen=True)
 class Identifier(Expression):
     name: str
     line: int

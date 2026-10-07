@@ -8,6 +8,7 @@ from compiler.ast_nodes import (
     PrintStatement,
     Program,
     Statement,
+    StringLiteral,
     VariableDeclaration,
 )
 from compiler.ir import IROp, IRProgram, Quadruple
@@ -20,6 +21,8 @@ class IRGenerationError(Exception):
 
 
 class IRGenerator:
+    STRING_PREFIX = "string:"
+
     def __init__(self) -> None:
         self.instructions: list[Quadruple] = []
         self.temporary_count = 0
@@ -68,8 +71,10 @@ class IRGenerator:
 
             if expression_type == FPlusType.INT:
                 print_operator = IROp.PRINT_INT
-            else:
+            elif expression_type == FPlusType.BOOL:
                 print_operator = IROp.PRINT_BOOL
+            else:
+                print_operator = IROp.PRINT_STRING
 
             self._emit(
                 print_operator,
@@ -92,6 +97,9 @@ class IRGenerator:
 
         if isinstance(expression, BooleanLiteral):
             return FPlusType.BOOL
+
+        if isinstance(expression, StringLiteral):
+            return FPlusType.STRING
 
         if isinstance(expression, Identifier):
             variable_type = self.variable_types.get(expression.name)
@@ -117,6 +125,9 @@ class IRGenerator:
 
         if isinstance(expression, BooleanLiteral):
             return "1" if expression.value else "0"
+
+        if isinstance(expression, StringLiteral):
+            return self.STRING_PREFIX + expression.value
 
         if isinstance(expression, Identifier):
             return expression.name

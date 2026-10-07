@@ -67,6 +67,30 @@ def test_scan_integers() -> None:
     ]
 
 
+def test_scan_string_with_escapes() -> None:
+    tokens = Lexer(r'"hello\n\t\"world\"\\"').scan_tokens()
+
+    assert tokens[0].type == TokenType.STRING
+    assert tokens[0].lexeme == r'"hello\n\t\"world\"\\"'
+    assert tokens[0].literal == 'hello\n\t"world"\\'
+
+
+def test_unterminated_string_is_rejected() -> None:
+    with pytest.raises(
+        LexerError,
+        match=r"Unterminated string at line 1, column 1",
+    ):
+        Lexer('"hello').scan_tokens()
+
+
+def test_unknown_string_escape_is_rejected() -> None:
+    with pytest.raises(
+        LexerError,
+        match=r"Unknown escape sequence \\q",
+    ):
+        Lexer(r'"hello\q"').scan_tokens()
+
+
 def test_scan_fixed_tokens() -> None:
     tokens = Lexer("= + - * / ( ) ;").scan_tokens()
 

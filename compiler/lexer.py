@@ -64,6 +64,10 @@ class Lexer:
             self._scan_integer()
             return
 
+        if character == '"':
+            self._scan_string()
+            return
+
         if character.isalpha():
             self._scan_identifier()
             return
@@ -99,10 +103,57 @@ class Lexer:
 
         self._add_token(token_type, literal)
 
+    def _scan_string(self) -> None:
+        characters: list[str] = []
+        escapes = {
+            '"': '"',
+            "\\": "\\",
+            "n": "\n",
+            "t": "\t",
+            "r": "\r",
+        }
+
+        while not self._is_at_end():
+            character = self._advance()
+
+            if character == '"':
+                self._add_token(TokenType.STRING, "".join(characters))
+                return
+
+            if character == "\n":
+                raise LexerError(
+                    f"Unterminated string at line {self.start_line}, "
+                    f"column {self.start_column}"
+                )
+
+            if character == "\\":
+                if self._is_at_end():
+                    break
+
+                escape = self._advance()
+                escaped_character = escapes.get(escape)
+
+                if escaped_character is None:
+                    raise LexerError(
+                        f"Unknown escape sequence \\{escape} "
+                        f"at line {self.line}, "
+                        f"column {self.column - 2}"
+                    )
+
+                characters.append(escaped_character)
+                continue
+
+            characters.append(character)
+
+        raise LexerError(
+            f"Unterminated string at line {self.start_line}, "
+            f"column {self.start_column}"
+        )
+
     def _add_token(
         self,
         token_type: TokenType,
-        literal: int | bool | None = None,
+        literal: int | bool | str | None = None,
     ) -> None:
         lexeme = self.source[self.start:self.current]
 

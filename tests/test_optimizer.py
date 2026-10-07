@@ -62,6 +62,20 @@ def test_constant_propagation_into_typed_prints() -> None:
     ]
 
 
+def test_string_operands_are_preserved() -> None:
+    instructions = optimize(
+        Quadruple(IROp.ASSIGN, "string:hello", None, "greeting"),
+        Quadruple(IROp.PRINT_STRING, "greeting", None, None),
+        Quadruple(IROp.PRINT_STRING, "string:world", None, None),
+    )
+
+    assert instructions == [
+        Quadruple(IROp.ASSIGN, "string:hello", None, "greeting"),
+        Quadruple(IROp.PRINT_STRING, "greeting", None, None),
+        Quadruple(IROp.PRINT_STRING, "string:world", None, None),
+    ]
+
+
 def test_nonconstant_expression_is_preserved() -> None:
     instructions = optimize(
         Quadruple(IROp.ADD, "x", "5", "t1"),

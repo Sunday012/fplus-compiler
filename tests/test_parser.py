@@ -7,6 +7,7 @@ from compiler.ast_nodes import (
     Identifier,
     IntegerLiteral,
     PrintStatement,
+    StringLiteral,
     VariableDeclaration,
 )
 from compiler.lexer import Lexer
@@ -130,6 +131,15 @@ def test_boolean_literals() -> None:
     assert isinstance(second, VariableDeclaration)
     assert isinstance(second.initializer, BooleanLiteral)
     assert second.initializer.value is False
+
+
+def test_string_literal() -> None:
+    program = parse('let greeting = "hello, world";')
+    declaration = program.statements[0]
+
+    assert isinstance(declaration, VariableDeclaration)
+    assert isinstance(declaration.initializer, StringLiteral)
+    assert declaration.initializer.value == "hello, world"
 
 
 def test_missing_semicolon_is_rejected() -> None:

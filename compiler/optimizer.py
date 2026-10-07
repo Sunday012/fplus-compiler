@@ -36,6 +36,7 @@ class Optimizer:
                 IROp.PRINT,
                 IROp.PRINT_INT,
                 IROp.PRINT_BOOL,
+                IROp.PRINT_STRING,
             }:
                 self._optimize_print(
                     instruction,

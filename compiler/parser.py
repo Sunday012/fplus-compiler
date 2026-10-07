@@ -8,6 +8,7 @@ from compiler.ast_nodes import (
     PrintStatement,
     Program,
     Statement,
+    StringLiteral,
     VariableDeclaration,
 )
 from compiler.tokens import Token, TokenType
@@ -160,6 +161,15 @@ class Parser:
         return expression
 
     def _factor(self) -> Expression:
+        if self._match(TokenType.STRING):
+            token = self._previous()
+
+            return StringLiteral(
+                value=token.literal,
+                line=token.line,
+                column=token.column,
+            )
+
         if self._match(TokenType.INTEGER):
             token = self._previous()
 

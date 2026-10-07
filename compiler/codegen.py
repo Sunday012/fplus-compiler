@@ -6,8 +6,15 @@ class CodeGenerationError(Exception):
 
 
 class CodeGenerator:
+    STRING_PREFIX = "string:"
+
     def generate(self, program: IRProgram) -> str:
         variables = self._collect_variables(program)
+        string_literals = self._collect_string_literals(program)
+        self.string_labels = {
+            value: f"string_{index}"
+            for index, value in enumerate(string_literals)
+        }
         lines: list[str] = []
 
         lines.extend(
@@ -17,12 +24,18 @@ class CodeGenerator:
                 "section .data",
                 '    format_int db "%ld", 10, 0',
                 '    format_bool db "%s", 10, 0',
+                '    format_string db "%s", 10, 0',
                 '    true_text db "true", 0',
                 '    false_text db "false", 0',
-                "",
-                "section .bss",
             ]
         )
+
+        for value, label in self.string_labels.items():
+            encoded = ", ".join(str(byte) for byte in value.encode("utf-8"))
+            data = f"{encoded}, 0" if encoded else "0"
+            lines.append(f"    {label} db {data}")
+
+        lines.extend(["", "section .bss"])
 
         for variable in sorted(variables):
             lines.append(f"    {self._label(variable)} resq 1")
@@ -77,6 +90,9 @@ class CodeGenerator:
 
         if instruction.operator == IROp.PRINT_BOOL:
             return self._generate_print_bool(instruction)
+
+        if instruction.operator == IROp.PRINT_STRING:
+            return self._generate_print_string(instruction)
 
         raise CodeGenerationError(
             f"Unsupported IR operation: {instruction.operator.name}"
@@ -197,6 +213,23 @@ class CodeGenerator:
 
         return lines
 
+    def _generate_print_string(
+        self,
+        instruction: Quadruple,
+    ) -> list[str]:
+        lines = self._load_operand(
+            instruction.argument1,
+            register="rsi",
+        )
+        lines.extend(
+            [
+                "    lea rdi, [rel format_string]",
+                "    xor eax, eax",
+                "    call printf",
+            ]
+        )
+        return lines
+
     def _load_operand(
         self,
         operand: str,
@@ -204,6 +237,12 @@ class CodeGenerator:
     ) -> list[str]:
         if self._is_integer(operand):
             return [f"    mov {register}, {operand}"]
+
+        if self._is_string_literal(operand):
+            value = operand[len(self.STRING_PREFIX):]
+            return [
+                f"    lea {register}, [rel {self.string_labels[value]}]"
+            ]
 
         return [
             f"    mov {register}, [rel {self._label(operand)}]"
@@ -222,19 +261,39 @@ class CodeGenerator:
             if (
                 instruction.result is not None
                 and not self._is_integer(instruction.result)
+                and not self._is_string_literal(instruction.result)
             ):
                 variables.add(instruction.result)
 
-            if not self._is_integer(instruction.argument1):
+            if (
+                not self._is_integer(instruction.argument1)
+                and not self._is_string_literal(instruction.argument1)
+            ):
                 variables.add(instruction.argument1)
 
             if (
                 instruction.argument2 is not None
                 and not self._is_integer(instruction.argument2)
+                and not self._is_string_literal(instruction.argument2)
             ):
                 variables.add(instruction.argument2)
 
         return variables
+
+    def _collect_string_literals(self, program: IRProgram) -> list[str]:
+        literals: list[str] = []
+
+        for instruction in program.instructions:
+            for operand in (
+                instruction.argument1,
+                instruction.argument2,
+            ):
+                if operand is not None and self._is_string_literal(operand):
+                    value = operand[len(self.STRING_PREFIX):]
+                    if value not in literals:
+                        literals.append(value)
+
+        return literals
 
     def _label(self, name: str) -> str:
         return f"fplus_{name}"
@@ -244,3 +303,6 @@ class CodeGenerator:
             return value[1:].isdigit()
 
         return value.isdigit()
+
+    def _is_string_literal(self, value: str) -> bool:
+        return value.startswith(self.STRING_PREFIX)

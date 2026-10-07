@@ -12,6 +12,7 @@ class TokenType(Enum):
     # Literals and identifiers
     IDENTIFIER = auto()
     INTEGER = auto()
+    STRING = auto()
 
     # Operators
     EQUAL = auto()
@@ -33,7 +34,7 @@ class TokenType(Enum):
 class Token:
     type: TokenType
     lexeme: str
-    literal: int | bool | None
+    literal: int | bool | str | None
     line: int
     column: int
 

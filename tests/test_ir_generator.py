@@ -41,6 +41,18 @@ def test_boolean_declarations() -> None:
     ]
 
 
+def test_string_declaration_and_print() -> None:
+    instructions = generate_ir(
+        'let greeting = "hello"; print(greeting); print("world");'
+    )
+
+    assert instructions == [
+        Quadruple(IROp.ASSIGN, "string:hello", None, "greeting"),
+        Quadruple(IROp.PRINT_STRING, "greeting", None, None),
+        Quadruple(IROp.PRINT_STRING, "string:world", None, None),
+    ]
+
+
 def test_operator_precedence() -> None:
     instructions = generate_ir("let x = 2 + 3 * 4;")
 

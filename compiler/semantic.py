@@ -10,6 +10,7 @@ from compiler.ast_nodes import (
     PrintStatement,
     Program,
     Statement,
+    StringLiteral,
     VariableDeclaration,
 )
 from compiler.tokens import TokenType
@@ -22,6 +23,7 @@ class SemanticError(Exception):
 class FPlusType(Enum):
     INT = "int"
     BOOL = "bool"
+    STRING = "string"
 
 
 class SemanticAnalyzer:
@@ -98,6 +100,9 @@ class SemanticAnalyzer:
 
         if isinstance(expression, BooleanLiteral):
             return FPlusType.BOOL
+
+        if isinstance(expression, StringLiteral):
+            return FPlusType.STRING
 
         if isinstance(expression, Identifier):
             return self._infer_identifier_type(expression)

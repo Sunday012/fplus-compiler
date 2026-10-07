@@ -12,6 +12,7 @@ class IROp(Enum):
     PRINT = auto()
     PRINT_INT = auto()
     PRINT_BOOL = auto()
+    PRINT_STRING = auto()
 
 @dataclass(frozen=True)
 class Quadruple:

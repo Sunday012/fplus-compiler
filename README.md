@@ -3,17 +3,19 @@
 F+ is a small, statically typed programming language that compiles to native
 x86-64 Linux executables. The compiler is written in Python and currently
 supports a compact language core: variables, assignment, integer arithmetic,
-boolean values, printing, semantic checks, IR generation, optimization, and
-assembly code generation.
+boolean and string values, printing, semantic checks, IR generation,
+optimization, and assembly code generation.
 
 ## Example
 
 ```fplus
 let x = 2 + 3 * 4;
 let passed = true;
+let greeting = "Hello, F+!";
 
 print(x);
 print(passed);
+print(greeting);
 ```
 
 Expected output:
@@ -21,24 +23,39 @@ Expected output:
 ```text
 14
 true
+Hello, F+!
 ```
 
 ## Language Features
 
 F+ version 1 supports:
 
-- Integer and boolean values
+- Integer, boolean, and UTF-8 string values
 - Variable declarations with `let`
 - Variable assignment
 - Arithmetic expressions with `+`, `-`, `*`, and `/`
 - Parenthesized expressions
 - `print(...)` statements
+- String escapes for newlines (`\n`), tabs (`\t`), carriage returns (`\r`),
+  quotes (`\"`), and backslashes (`\\`)
 - Static type checking through type inference
 - Constant folding optimization
 - Native executable output through NASM and GCC
 
-F+ does not yet support conditionals, loops, functions, strings, arrays,
-user-defined types, or explicit type annotations.
+F+ does not yet support conditionals, loops, functions, arrays, user-defined
+types, string concatenation, or explicit type annotations.
+
+String literals use double quotes and can be stored, reassigned, and printed:
+
+```fplus
+let message = "first line\nsecond line";
+message = "She said: \"Hello!\"";
+print(message);
+```
+
+Strings are a distinct static type. Arithmetic operators remain restricted to
+integers, so an expression such as `"hello" + 1` is rejected during semantic
+analysis.
 
 ## Requirements
 
@@ -118,6 +135,7 @@ compiler/
   codegen.py        Emits x86-64 assembly
 examples/
   hello.fp          Example F+ program
+  strings.fp        String literals and escape sequences
 tests/
   test_*.py         Unit tests for compiler stages
 main.py             Command-line compiler entry point

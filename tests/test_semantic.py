@@ -24,6 +24,7 @@ def test_infers_variable_types() -> None:
         """
         let age = 19;
         let passed = true;
+        let greeting = "hello";
         let total = age + 5;
         """
     )
@@ -31,6 +32,7 @@ def test_infers_variable_types() -> None:
     assert analyzer.symbols == {
         "age": FPlusType.INT,
         "passed": FPlusType.BOOL,
+        "greeting": FPlusType.STRING,
         "total": FPlusType.INT,
     }
 
@@ -46,7 +48,7 @@ def test_valid_assignment() -> None:
     assert analyzer.symbols["score"] == FPlusType.INT
 
 
-def test_print_accepts_integers_and_booleans() -> None:
+def test_print_accepts_integers_booleans_and_strings() -> None:
     analyze(
         """
         let score = 10;
@@ -54,6 +56,7 @@ def test_print_accepts_integers_and_booleans() -> None:
 
         print(score);
         print(passed);
+        print("hello");
         """
     )
 
@@ -111,6 +114,22 @@ def test_boolean_arithmetic_is_rejected() -> None:
             let result = passed + 5;
             """
         )
+
+
+def test_string_arithmetic_is_rejected() -> None:
+    with pytest.raises(
+        SemanticError,
+        match=r"requires int operands",
+    ):
+        analyze('let result = "hello" + 5;')
+
+
+def test_string_cannot_be_assigned_to_integer() -> None:
+    with pytest.raises(
+        SemanticError,
+        match=r"Cannot assign string to variable 'score' of type int",
+    ):
+        analyze('let score = 10; score = "ten";')
 
 
 def test_literal_division_by_zero_is_rejected() -> None:
