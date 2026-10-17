@@ -107,10 +107,14 @@ python3 main.py examples/hello.fp --no-optimize
 
 ## Development
 
-Run the tests with:
+Create a virtual environment, install the development dependencies, and run
+the tests:
 
 ```bash
-pytest
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m pytest
 ```
 
 The compiler pipeline is:
@@ -140,6 +144,15 @@ tests/
   test_*.py         Unit tests for compiler stages
 main.py             Command-line compiler entry point
 ```
+
+## Contributing
+
+Contributions are welcome. You can help by reporting bugs, proposing language
+features, improving documentation, or submitting code. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) before opening an issue or pull request.
+
+By participating in the project, you agree to follow the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Documentation
 

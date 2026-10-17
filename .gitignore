@@ -12,3 +12,6 @@ hello
 .vscode/
 .idea/
 .DS_Store
+
+# Local Codex workspaces and unrelated nested repositories
+.codex-work/
